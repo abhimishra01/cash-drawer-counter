@@ -7,3 +7,7 @@ dist
 screenshots/
 dist-*/
 tmp-*/
+
+# Local screenshots and test prints in the repo root
+/*.png
+/*.pdf
