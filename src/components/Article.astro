@@ -1,25 +1,21 @@
 ---
-import site from '../site.config.ts';
+import { STEPS } from '../data/steps.js';
+import { url } from '../lib/url.ts';
 ---
 <section aria-labelledby="about-tool" class="mx-auto max-w-5xl px-4 pt-16">
   <article class="prose-site">
     <h2 id="about-tool" style="margin-top:0">How to count the drawer</h2>
-    <p>The cash drawer calculator on this page adds up the bills and coins in your register at the end of a shift. You type how many of each you have. The tool does the math, shows the total, and tells you how much to deposit. It also shows what to leave in the drawer and which bills and coins to pull.</p>
+    <p>The cash drawer calculator on this page adds up the bills and coins in your register at the end of a shift. You type how many of each you have. The tool does the math, shows the total, and tells you how much to deposit. It also shows what to leave in the drawer and which bills and coins to take out.</p>
     <h2>Count the drawer in six steps</h2>
     <ol>
-      <li>Close the sale screen so no new sales come in while you count.</li>
-      <li>Take all cash out of the drawer, including the bills under the tray.</li>
-      <li>Sort it by type. Face all bills the same way and put the largest on top.</li>
-      <li>Count each type once and enter the number in its row. Start with the $100 bills and work down to the pennies.</li>
-      <li>Enter your starting float. The tool shows the cash to deposit, what to leave in the drawer, and what to pull.</li>
-      <li>Enter the expected cash sales from your register report. The tool shows if you are over or short.</li>
+      {STEPS.map((t) => <li>{t}</li>)}
     </ol>
-    <p>Press Enter after each row to jump to the next one. On a phone, the number keypad opens by itself.</p>
+    <p>Press Enter after each row to jump to the next one. On a phone, the number keypad opens by itself. This is the same count that shops call a till count, a register balance or "cashing up".</p>
     <h2>What is a float?</h2>
     <p>A float is the cash you leave in the drawer so the next shift can make change. It is also called a bank, a till float, or a starting bank. Many shops use $100 to $300. The float is not sales money. You count it, then you leave it.</p>
     <p>Your deposit is the total in the drawer minus the float. If you count $1,250.00 and the float is $200.00, you deposit $1,050.00.</p>
-    <h2>How the pull list works</h2>
-    <p>The tool picks the float first, so the next shift can make change. It aims for a mix: about 40% in $20 bills, then $10 bills, $5 bills and $1 bills, with a few quarters, dimes, nickels and pennies. If the drawer lacks one kind, it fills the gap with what you have, largest first. It never leaves $100 or $50 bills in the drawer. Everything else goes in the deposit.</p><p>If the cash can make the float exactly, the tool finds a way to do it. If it cannot, the tool says how much is missing, so you can swap bills by hand. The deposit shown is always the value of the pull list.</p>
+    <h2>How the take-out list works</h2>
+    <p>The tool picks the float first, so the next shift can make change. It aims for a mix: about 40% in $20 bills, then $10 bills, $5 bills and $1 bills, with a few quarters, dimes, nickels and pennies. If the drawer lacks one kind, it fills the gap with what you have, largest first. It never leaves $100 or $50 bills in the drawer. Everything else goes in the deposit. The tool shows a green check when the bills it leaves add up to exactly your float.</p><p>If the cash can make the float exactly, the tool finds a way to do it. If it cannot, the tool says how much is missing, so you can swap bills by hand. The deposit shown is always the value of the take-out list.</p>
     <h2>Tips to avoid counting errors</h2>
     <ul>
       <li>Count twice if the drawer is off by more than a few dollars. Count a different way the second time, for example by stack size.</li>
@@ -34,7 +30,7 @@ import site from '../site.config.ts';
     <ul>
       <li>Bills add up to $1,090.00. Coins add up to $7.25. The total in the drawer is $1,097.25.</li>
       <li>The float is $200.00. The tool leaves 8 $20 bills, 1 $10 bill, 3 $5 bills, 10 $1 bills, 13 quarters, 11 dimes, 10 nickels and 15 pennies in the drawer.</li>
-      <li>Cash to deposit is $897.25. You pull 2 $100 bills, 3 $50 bills, 12 $20 bills, 14 $10 bills, 27 $5 bills, 30 $1 bills, 7 quarters, 4 dimes and 10 pennies.</li>
+      <li>Cash to deposit is $897.25. You take out 2 $100 bills, 3 $50 bills, 12 $20 bills, 14 $10 bills, 27 $5 bills, 30 $1 bills, 7 quarters, 4 dimes and 10 pennies.</li>
       <li>Expected cash sales from the register report are $890.00. The drawer is over by $7.25.</li>
     </ul>
     <h2>Common values at a glance</h2>
@@ -50,11 +46,15 @@ import site from '../site.config.ts';
       </tbody>
     </table>
     <h2>Over and short</h2>
-    <p>Over means you have more cash than the register says. Short means less. A small difference is common, often from wrong change. A large or repeated difference needs a check of voids, refunds, tips, and paid-outs. This tool uses your total minus the float, then compares it to expected cash sales. Use cash sales only, not card sales.</p>
+    <p>Over means you have more cash than the register says. Short means less. A small difference is common, often from wrong change. A large or repeated difference needs a check of voids, refunds, tips, and paid-outs. The tool works out the cash the drawer should hold: the float plus cash sales, minus any paid-outs. It compares that with your count. Use cash sales only, not card sales. There is a worked example on the <a href={url('cash-drawer-over-short-calculator/')}>over and short calculator</a> page.</p>
     <h2>How to close out a register</h2>
-    <p>To close out a register, or cash out a till, stop sales and print the end-of-shift report. Take the till out and count it once with this calculator. Enter the cash sales from the report. Leave the float in the drawer, put the deposit in a bag with the count sheet, and sign it. A cash drop during the shift works the same way: count what you pull and write it down.</p>
+    <p>To close out a register, or cash out a till, stop sales and print the end-of-shift report. Take the till out and count it once with this calculator. Enter the cash sales from the report. Leave the float in the drawer, put the deposit in a bag with the count sheet, and sign it. A cash drop during the shift works the same way: count what you take out and write it down. The <a href={url('cash-drop-calculator/')}>cash drop calculator</a> page shows how.</p>
     <h2>Who uses a drawer count</h2>
     <p>Cashiers count at the end of every shift. Shift leads count when one cashier hands the drawer to the next. Owners of small shops and food trucks count to match the cash against the sales report before the bank run. The steps are the same for each of them, so one calculator fits all three.</p>
+    <h2 id="count-sheet">Cash register count sheet</h2>
+    <p>Some shops want a paper count sheet. There is a free <a href={url('cash-register-count-sheet/')}>cash register count sheet</a> that you can print blank. It has opening and closing columns, an over and short section, and lines for the cashier and the checker to sign. It fits on one Letter page. You can also fill in this calculator and print the filled sheet, with the cashier name and register number if you add them under Sheet details.</p>
+    <h2>Half dollars</h2>
+    <p>Half dollars are under More coins, below the rolls. Most drawers have none, so the row stays closed until you open it.</p>
     <h2>Private and fast</h2>
     <p>Everything runs in your browser. Your counts are not sent anywhere. The tool saves your last float and your counts on your own device, so you do not need to type the float every night and a refresh does not lose a count. Use the Print button for a clean sheet, or Copy summary to paste it into an email or a text.</p>
   </article>

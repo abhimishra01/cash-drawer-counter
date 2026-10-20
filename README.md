@@ -4,9 +4,12 @@ Free shift-end cash drawer calculator for US cashiers and shop staff. Domain: co
 Astro (static) + Tailwind 4. No backend. All money is integer cents.
 
 ## What it does
-- Rows for $100 to $1 bills, $1 coins, quarters, dimes, nickels, pennies and coin rolls, with live row and grand totals.
+- Rows for $100 to $1 bills, $1 coins, quarters, dimes, nickels, pennies, coin rolls and half dollars (under More coins), with live row and grand totals.
 - Starting float: shows the cash to deposit, what to leave in the drawer and what to pull.
-- Optional expected cash sales: shows over, short or balanced.
+- Optional expected cash sales and paid-outs: shows over, short or balanced (expected = float + sales - paid-outs).
+- "Use this count as my float", optional cashier name and register number (saved on the device).
+- A printable blank count sheet at `/cash-register-count-sheet/`.
+- Nine guide pages (float, how much to leave, over and short, cash drop, rolls, coffee shop, food truck, close-out checklist, bar). Their text lives in `src/data/guides.ts`; the tool opens with the page's preset float. Float breakdown tables come from `src/data/floatplans.js` and are checked by the tests.
 - Copy summary, Print (one page, with sign-off line), two-tap Reset.
 - Saves the last float and the current counts in the browser (localStorage, in try/catch).
 

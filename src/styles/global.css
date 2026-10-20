@@ -66,3 +66,10 @@ body { background: var(--paper); color: var(--ink); font-family: var(--font-sans
 .prose-site th, .prose-site td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--line); }
 .prose-site td:last-child, .prose-site th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
 .prose-site th { font-weight: 650; color: var(--muted); font-size: 0.85rem; }
+.prose-site table.wide { max-width: 100%; }
+.prose-site table.wide td:last-child, .prose-site table.wide th:last-child { text-align: left; }
+.prose-site table.wide td:not(:first-child), .prose-site table.wide th:not(:first-child) { font-variant-numeric: tabular-nums; }
+.prose-site h3 + p { margin-top: 0; }
+.prose-site table.plan { max-width: 100%; }
+.prose-site table.plan td:not(:first-child), .prose-site table.plan th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.prose-site table.wide td:nth-child(2) { white-space: nowrap; }

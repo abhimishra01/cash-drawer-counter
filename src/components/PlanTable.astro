@@ -1,0 +1,15 @@
+---
+import { DENOMS, formatCents } from '../lib/drawer.js';
+import { FLOAT_PLANS } from '../data/floatplans.js';
+interface Props { keys: string[]; }
+const { keys } = Astro.props;
+const plans = keys.map((k) => FLOAT_PLANS[k as keyof typeof FLOAT_PLANS]);
+const rows = DENOMS.filter((d) => plans.some((p) => (p.counts as Record<string, number>)[d.id]));
+---
+<table class="plan">
+  <thead><tr><th>Bills and coins</th>{plans.map((p) => <th>{p.label}</th>)}</tr></thead>
+  <tbody>
+    {rows.map((d) => <tr><td>{d.label}</td>{plans.map((p) => <td>{(p.counts as Record<string, number>)[d.id] ?? '-'}</td>)}</tr>)}
+    <tr><td><strong>Total</strong></td>{plans.map((p) => <td><strong>{formatCents(p.cents)}</strong></td>)}</tr>
+  </tbody>
+</table>

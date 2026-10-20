@@ -1,28 +1,32 @@
 ---
 import { DENOMS } from '../lib/drawer.js';
+import CountRow from './CountRow.astro';
+import { url } from '../lib/url.ts';
+interface Props { presetFloat?: string; }
+const { presetFloat = '' } = Astro.props;
 const groups = ['Bills', 'Coins', 'Rolls'].map((g) => ({ name: g, rows: DENOMS.filter((d) => d.group === g) }));
+const more = DENOMS.filter((d) => d.group === 'More coins');
 const field = 'block rounded-xl border border-edge bg-paper px-3 text-lg font-semibold tabular-nums outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 aria-[invalid=true]:border-red-600';
 const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-center justify-center rounded-xl border border-edge bg-paper text-2xl font-bold leading-none select-none active:bg-brand-soft hover:bg-brand-soft';
+const small = 'block rounded-xl border border-edge bg-paper px-3 text-base outline-none focus:border-brand focus:ring-2 focus:ring-brand/30';
 ---
-<section id="tool" aria-label="Cash drawer counter" class="rounded-2xl border border-line bg-card p-4 shadow-[var(--card-shadow)] sm:p-6">
+<section id="tool" aria-label="Cash drawer counter" data-preset-float={presetFloat} class="rounded-2xl border border-line bg-card p-4 shadow-[var(--card-shadow)] sm:p-6">
   <div class="grid gap-8 lg:grid-cols-[1.25fr_1fr]">
     <div id="rows" class="space-y-5">
       {groups.map((g) => (
         <fieldset>
           <legend class="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{g.name}</legend>
           <div class="space-y-2">
-            {g.rows.map((d) => (
-              <div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-2 sm:grid-cols-[1fr_auto_auto_auto_6rem]" data-row={d.id}>
-                <label for={`in-${d.id}`} class="col-start-1 row-start-1 min-w-0 self-end text-sm font-medium leading-tight sm:self-center sm:text-base">{d.label}</label>
-                <button type="button" tabindex="-1" class={step} data-step="-1" data-for={d.id} aria-label={`One fewer ${d.label}`}>&minus;</button>
-                <input id={`in-${d.id}`} data-count={d.id} type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" placeholder="0" class={`${field} row-span-2 sm:row-span-1 h-12 w-16 text-center sm:w-20`} />
-                <button type="button" tabindex="-1" class={step} data-step="1" data-for={d.id} aria-label={`One more ${d.label}`}>+</button>
-                <output data-total={d.id} class="col-start-1 row-start-2 self-start font-mono text-xs tabular-nums text-muted sm:col-start-5 sm:row-start-1 sm:self-center sm:text-right sm:text-sm">$0.00</output>
-              </div>
-            ))}
+            {g.rows.map((d) => <CountRow d={d} field={field} step={step} />)}
           </div>
         </fieldset>
       ))}
+      <details id="more-coins" class="group rounded-xl border border-line px-3 py-2">
+        <summary class="cursor-pointer list-none text-sm font-semibold [&::-webkit-details-marker]:hidden">More coins: half dollars <span class="text-muted group-open:hidden">(tap to open)</span></summary>
+        <div class="mt-3 space-y-2 pb-1">
+          {more.map((d) => <CountRow d={d} field={field} step={step} />)}
+        </div>
+      </details>
     </div>
 
     <div class="space-y-4 lg:sticky lg:top-20 lg:self-start">
@@ -39,27 +43,47 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
           </div>
           <p id="float-hint" class="mt-1 text-xs text-muted">Cash you leave for the next shift. Enter 0 if none.</p>
           <p id="float-err" class="mt-1 hidden text-xs font-medium text-red-700 dark:text-red-400" role="alert">Enter dollars and cents, like 200.00</p>
+          <button type="button" id="use-float" class="mt-1 text-left text-xs font-medium text-brand-ink underline underline-offset-2">Use this count as my float</button>
         </div>
         <div>
           <label for="sales" class="block text-sm font-semibold">Expected cash sales</label>
           <div class="relative mt-1">
             <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted" aria-hidden="true">$</span>
-            <input id="sales" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" maxlength="12" placeholder="optional" aria-describedby="sales-hint sales-err" class={`${field} h-12 w-full pl-7`} />
+            <input id="sales" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" maxlength="12" placeholder="optional" aria-describedby="sales-hint sales-err" class={`${field} h-12 w-full pl-7`} />
           </div>
           <p id="sales-hint" class="mt-1 text-xs text-muted">Cash sales only, from your register report. Not card sales.</p>
           <p id="sales-err" class="mt-1 hidden text-xs font-medium text-red-700 dark:text-red-400" role="alert">Enter dollars and cents, like 890.00</p>
         </div>
+        <div>
+          <label for="paid" class="block text-sm font-semibold">Paid out of the drawer</label>
+          <div class="relative mt-1">
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted" aria-hidden="true">$</span>
+            <input id="paid" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" maxlength="12" placeholder="optional" aria-describedby="paid-hint paid-err" class={`${field} h-12 w-full pl-7`} />
+          </div>
+          <p id="paid-hint" class="mt-1 text-xs text-muted">Cash taken out for supplies, refunds or tips paid.</p>
+          <p id="paid-err" class="mt-1 hidden text-xs font-medium text-red-700 dark:text-red-400" role="alert">Enter dollars and cents, like 20.00</p>
+        </div>
+        <details id="meta" class="mt-6 rounded-xl border border-line px-3 py-2">
+          <summary class="cursor-pointer list-none text-sm font-semibold [&::-webkit-details-marker]:hidden">Sheet details <span class="font-normal text-muted">(optional)</span></summary>
+          <div class="mt-2 space-y-2 pb-1">
+            <label class="block text-xs font-medium text-muted" for="cashier">Cashier name</label>
+            <input id="cashier" type="text" autocomplete="off" maxlength="40" class={`${small} h-10 w-full`} />
+            <label class="block text-xs font-medium text-muted" for="register">Register number</label>
+            <input id="register" type="text" autocomplete="off" maxlength="20" class={`${small} h-10 w-full`} />
+          </div>
+        </details>
       </div>
       <div id="results" class="space-y-3 rounded-xl border border-line p-4" aria-live="polite">
         <div class="flex items-baseline justify-between gap-3"><span class="text-sm font-semibold">Cash to deposit</span><span id="dep" class="font-mono text-2xl font-bold tabular-nums">&mdash;</span></div>
-        <div id="ovs-wrap" class="hidden flex-wrap items-baseline justify-between gap-3"><span id="ovs-label" class="text-sm font-semibold"></span><span id="ovs" class="font-mono text-xl font-bold tabular-nums"></span></div>
+        <div id="ovs-wrap" class="hidden flex-wrap items-baseline justify-between gap-3"><span id="ovs-label" class="text-sm font-semibold"></span><span id="ovs" class="font-mono text-xl font-bold tabular-nums"></span><p id="ovs-formula" class="basis-full text-xs text-muted"></p></div>
         <div id="pull-wrap" class="hidden space-y-3 border-t border-line pt-3">
           <div>
             <p class="text-sm font-semibold">Leave in the drawer</p>
             <ul id="keep" class="mt-1 space-y-0.5 text-sm tabular-nums"></ul>
+            <p id="keep-note" class="mt-1 text-sm font-medium text-green-700 dark:text-green-400"></p>
           </div>
           <div>
-            <p class="text-sm font-semibold">Pull for the deposit</p>
+            <p class="text-sm font-semibold">Take out for the deposit</p>
             <ul id="pull" class="mt-1 space-y-0.5 text-sm tabular-nums"></ul>
           </div>
           <p id="pull-note" class="text-sm font-medium text-red-700 dark:text-red-400"></p>
@@ -71,6 +95,7 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
         <button type="button" id="print" class="h-12 rounded-xl border border-edge px-4 font-semibold hover:bg-brand-soft">Print</button>
         <button type="button" id="reset" class="h-12 rounded-xl border border-edge px-4 font-semibold hover:bg-brand-soft">Reset</button>
       </div>
+      <p class="text-xs text-muted">To save a PDF, press Print and choose Save as PDF. Need paper? <a href={url('cash-register-count-sheet/')} class="font-medium text-brand-ink underline underline-offset-2">Print a blank count sheet</a>.</p>
       <p id="status" class="min-h-5 text-sm text-muted" role="status"></p>
     </div>
   </div>
@@ -83,10 +108,11 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
 
 <style is:global>
   .print-only { display: none; }
+  @page { size: letter; margin: 0.5in; }
   @media print {
     html, body { background: #fff !important; }
     body > :not(#sheet) { display: none !important; }
-    #sheet { display: block; margin: 0; font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; color: #000; white-space: pre-wrap; }
+    #sheet { display: block; margin: 0; font: 12px/1.3 ui-monospace, Menlo, Consolas, monospace; color: #000; white-space: pre-wrap; }
   }
   #ovs-wrap.flex { display: flex; }
 </style>
@@ -98,8 +124,13 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
   const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('[data-count]'));
   const floatEl = $('float') as HTMLInputElement;
   const salesEl = $('sales') as HTMLInputElement;
+  const paidEl = $('paid') as HTMLInputElement;
+  const cashierEl = $('cashier') as HTMLInputElement;
+  const registerEl = $('register') as HTMLInputElement;
+  const moreCoins = $('more-coins') as HTMLDetailsElement;
   const FLOAT_KEY = 'cdc-float';
   const COUNTS_KEY = 'cdc-counts';
+  const META_KEY = 'cdc-meta';
   const GOOD = 'text-green-700 dark:text-green-400';
   const BAD = 'text-red-700 dark:text-red-400';
 
@@ -121,8 +152,8 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
 
   /** Current float and sales. `blocked` is true when a filled field is not a valid amount. */
   function readMoney() {
-    const fm = parseMoney(floatEl.value), sm = parseMoney(salesEl.value);
-    return { flt: fm.cents, sales: sm.cents, fBad: fm.status === 'invalid', sBad: sm.status === 'invalid' };
+    const fm = parseMoney(floatEl.value), sm = parseMoney(salesEl.value), pm = parseMoney(paidEl.value);
+    return { flt: fm.cents, sales: sm.cents, paid: pm.cents ?? 0, fBad: fm.status === 'invalid', sBad: sm.status === 'invalid', pBad: pm.status === 'invalid' };
   }
 
   function update() {
@@ -132,15 +163,15 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
     setText($('grand'), formatCents(total));
     setText($('grand-bar'), formatCents(total));
 
-    const { flt, sales, fBad, sBad } = readMoney();
-    for (const [el, bad, err] of [[floatEl, fBad, 'float-err'], [salesEl, sBad, 'sales-err']] as const) {
+    const { flt, sales, paid, fBad, sBad, pBad } = readMoney();
+    for (const [el, bad, err] of [[floatEl, fBad, 'float-err'], [salesEl, sBad, 'sales-err'], [paidEl, pBad, 'paid-err']] as const) {
       el.setAttribute('aria-invalid', String(bad));
       $(err).classList.toggle('hidden', !bad);
     }
-    const blocked = fBad || sBad;
+    const blocked = fBad || sBad || pBad;
     const pullWrap = $('pull-wrap'), hint = $('hint'), note = $('pull-note');
     const ovsWrap = $('ovs-wrap'), ovs = $('ovs');
-    const r = drawerResult(c, blocked ? null : flt, blocked ? null : sales);
+    const r = drawerResult(c, blocked ? null : flt, blocked ? null : sales, paid);
 
     if (blocked) {
       setText($('dep'), '\u2014');
@@ -151,6 +182,7 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
     if (r.hasFloat) {
       setText($('dep'), formatCents(r.depositCents!));
       fillList($('keep'), r.keep); fillList($('pull'), r.pull);
+      setText($('keep-note'), r.missing === 0 && !r.underFloat ? `\u2713 Leaves exactly ${formatCents(flt!)}` : '');
       const notes: string[] = [];
       if (r.underFloat) notes.push(`The drawer is ${formatCents(flt! - total)} under the float.`);
       if (r.missing > 0) notes.push(`Only ${formatCents(flt! - r.missing)} of the ${formatCents(flt!)} float can be left in the drawer. Bills above $20 never stay as float. Add change or break a bill by hand.`);
@@ -167,6 +199,7 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
       ovsWrap.classList.add('flex'); ovsWrap.classList.remove('hidden');
       ovs.className = `font-mono text-xl font-bold tabular-nums ${o.diff >= 0 ? GOOD : BAD}`;
       setText($('ovs-label'), o.label);
+      setText($('ovs-formula'), `Expected in drawer ${formatCents(o.expected)} = float ${formatCents(flt!)} + cash sales ${formatCents(sales!)}${paid > 0 ? ` - paid-outs ${formatCents(paid)}` : ''}`);
       setText(ovs, o.diff === 0 ? '$0.00' : formatCents(Math.abs(o.diff)));
     } else { ovsWrap.classList.add('hidden'); ovsWrap.classList.remove('flex'); }
   }
@@ -193,7 +226,7 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
     statusTimer = window.setTimeout(() => { $('status').textContent = ''; }, ms);
   };
 
-  const order: HTMLInputElement[] = [...inputs, floatEl, salesEl];
+  const order: HTMLInputElement[] = [...inputs, floatEl, salesEl, paidEl];
   order.forEach((el, i) => {
     el.dataset.prev = '';
     el.addEventListener('input', () => {
@@ -210,7 +243,12 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
       update();
     });
     el.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); (order[i + 1] ?? el).focus(); (order[i + 1] ?? el).select?.(); }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        // Skip rows inside a closed fold (half dollars).
+        const nxt = order.slice(i + 1).find((x) => x.offsetParent !== null) ?? el;
+        nxt.focus(); nxt.select?.();
+      }
       if (el.dataset.count && e.key === 'ArrowUp') { e.preventDefault(); stepRow(el.dataset.count, 1); }
       if (el.dataset.count && e.key === 'ArrowDown') { e.preventDefault(); stepRow(el.dataset.count, -1); }
     });
@@ -219,9 +257,9 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
 
   /** The count sheet, with the time of the press. Null when a money field is not valid. */
   function sheetText(): string | null {
-    const { flt, sales, fBad, sBad } = readMoney();
-    if (fBad || sBad) { status('Fix the amount marked in red first.'); return null; }
-    return buildSummary(counts(), flt, sales, new Date().toLocaleString('en-US'));
+    const { flt, sales, paid, fBad, sBad, pBad } = readMoney();
+    if (fBad || sBad || pBad) { status('Fix the amount marked in red first.'); return null; }
+    return buildSummary(counts(), flt, sales, new Date().toLocaleString('en-US'), { cashier: cashierEl.value.trim(), register: registerEl.value.trim(), paidOutCents: paid });
   }
 
   $('copy').addEventListener('click', async () => {
@@ -237,6 +275,22 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
     window.print();
   });
 
+  for (const el of [cashierEl, registerEl]) {
+    el.addEventListener('input', () => {
+      try { localStorage.setItem(META_KEY, JSON.stringify({ cashier: cashierEl.value, register: registerEl.value })); } catch {}
+    });
+  }
+
+  $('use-float').addEventListener('click', () => {
+    const t = grandTotal(counts());
+    if (t === 0) { status('Count the drawer first, then use the total as your float.'); return; }
+    const txt = formatCents(t).replace(/^\$/, '').replace(/,/g, '').replace(/\.00$/, '');
+    floatEl.value = txt;
+    try { localStorage.setItem(FLOAT_KEY, txt); } catch {}
+    update();
+    status(`Float set to ${formatCents(t)} from this count.`);
+  });
+
   // Reset needs two taps, so one slip does not lose a long count.
   const resetBtn = $('reset');
   let resetTimer = 0;
@@ -248,9 +302,9 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
       return;
     }
     clearTimeout(resetTimer); disarm();
-    inputs.forEach((i) => { i.value = ''; i.dataset.prev = ''; }); salesEl.value = '';
+    inputs.forEach((i) => { i.value = ''; i.dataset.prev = ''; }); salesEl.value = ''; paidEl.value = '';
     saveCounts(); update();
-    status('Counts and expected sales cleared. The float is kept.', 8000);
+    status('Counts, sales and paid-outs cleared. The float and sheet details are kept.', 8000);
   });
 
   // Show the sticky total bar only while the tool is on screen.
@@ -260,12 +314,19 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
   }
 
   try {
-    const f = localStorage.getItem(FLOAT_KEY); if (f) floatEl.value = f;
+    const f = localStorage.getItem(FLOAT_KEY);
+    // A saved float wins. The page preset only fills an empty field and is not saved until the person types.
+    floatEl.value = f || $('tool').dataset.presetFloat || '';
+    const meta = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+    if (typeof meta.cashier === 'string') cashierEl.value = meta.cashier.slice(0, 40);
+    if (typeof meta.register === 'string') registerEl.value = meta.register.slice(0, 20);
     const saved = JSON.parse(localStorage.getItem(COUNTS_KEY) || '{}');
     for (const i of inputs) {
       const n = Number(saved[i.dataset.count!]);
       if (Number.isInteger(n) && n > 0 && n <= MAX_COUNT) { i.value = String(n); i.dataset.prev = i.value; }
     }
-  } catch {}
+  } catch { floatEl.value = floatEl.value || $('tool').dataset.presetFloat || ''; }
+  if (inputs.some((i) => i.dataset.count === 'c50' && i.value)) moreCoins.open = true;
+  if (cashierEl.value || registerEl.value) ($('meta') as HTMLDetailsElement).open = true;
   update();
 </script>

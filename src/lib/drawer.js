@@ -8,6 +8,7 @@ export const DENOMS = [
   { id: 'b2', label: '$2 bills', cents: 200, group: 'Bills' },
   { id: 'b1', label: '$1 bills', cents: 100, group: 'Bills' },
   { id: 'c100', label: '$1 coins', cents: 100, group: 'Coins' },
+  { id: 'c50', label: 'Half dollars', cents: 50, group: 'More coins' },
   { id: 'c25', label: 'Quarters', cents: 25, group: 'Coins' },
   { id: 'c10', label: 'Dimes', cents: 10, group: 'Coins' },
   { id: 'c5', label: 'Nickels', cents: 5, group: 'Coins' },
@@ -166,20 +167,27 @@ export function deposit(counts, keep) {
   return out;
 }
 
-/** Over or short: total minus float minus expected cash sales. Needs both float and sales. */
-export function overShort(totalCents, floatCents, salesCents) {
+/**
+ * Over or short: counted total minus what the drawer should hold.
+ * Expected cash = float + cash sales - paid-outs. Needs both float and sales; paid-outs default to 0.
+ */
+export function expectedCash(floatCents, salesCents, paidOutCents = 0) {
+  return floatCents + salesCents - paidOutCents;
+}
+export function overShort(totalCents, floatCents, salesCents, paidOutCents = 0) {
   if (floatCents === null || salesCents === null) return null;
-  const diff = totalCents - floatCents - salesCents;
-  return { diff, label: diff === 0 ? 'Balanced' : diff > 0 ? 'Over' : 'Short' };
+  const expected = expectedCash(floatCents, salesCents, paidOutCents);
+  const diff = totalCents - expected;
+  return { diff, expected, label: diff === 0 ? 'Balanced' : diff > 0 ? 'Over' : 'Short' };
 }
 
 /**
  * Everything the screen and the summary show. The deposit is the value of the pull list,
  * so the headline number and the list always agree.
  */
-export function drawerResult(counts, floatCents, salesCents) {
+export function drawerResult(counts, floatCents, salesCents, paidOutCents = 0) {
   const total = grandTotal(counts);
-  const result = { total, hasFloat: floatCents !== null, keep: {}, pull: {}, depositCents: null, missing: 0, underFloat: false, overShort: overShort(total, floatCents, salesCents) };
+  const result = { total, hasFloat: floatCents !== null, keep: {}, pull: {}, depositCents: null, missing: 0, underFloat: false, overShort: overShort(total, floatCents, salesCents, paidOutCents) };
   if (floatCents === null) return result;
   const pick = pickFloat(counts, floatCents);
   result.keep = pick.keep;
@@ -193,22 +201,33 @@ export function drawerResult(counts, floatCents, salesCents) {
 const lineList = (m) => DENOMS.filter((d) => m[d.id]).map((d) => `${m[d.id]} x ${d.label}`);
 export { lineList as describeCounts };
 
-/** Plain-text count sheet for Copy and Print. `when` is a ready-made date text. */
-export function buildSummary(counts, floatCents, salesCents, when) {
-  const r = drawerResult(counts, floatCents, salesCents);
-  const out = ['CASH DRAWER COUNT', when, ''];
+/**
+ * Plain-text count sheet for Copy and Print. `when` is a ready-made date text.
+ * `opts`: { cashier, register, paidOutCents } are all optional.
+ */
+export function buildSummary(counts, floatCents, salesCents, when, opts = {}) {
+  const paidOut = opts.paidOutCents ?? 0;
+  const r = drawerResult(counts, floatCents, salesCents, paidOut);
+  const out = ['CASH DRAWER COUNT', when];
+  if (opts.cashier) out.push(`Cashier: ${opts.cashier}`);
+  if (opts.register) out.push(`Register: ${opts.register}`);
+  out.push('');
   out.push(...DENOMS.filter((d) => counts[d.id]).map((d) => `${d.label.padEnd(22)} ${String(counts[d.id]).padStart(4)}  ${formatCents(rowTotal(d, counts[d.id])).padStart(11)}`));
   out.push('', `Total in drawer: ${formatCents(r.total)}`);
   if (r.hasFloat) {
     out.push(`Starting float: ${formatCents(floatCents)}`, `Cash to deposit: ${formatCents(r.depositCents)}`);
   }
   if (salesCents !== null) out.push(`Expected cash sales: ${formatCents(salesCents)}`);
-  if (r.overShort) out.push(r.overShort.diff === 0 ? 'Balanced ($0.00)' : `${r.overShort.label} ${formatCents(Math.abs(r.overShort.diff))}`);
+  if (paidOut > 0) out.push(`Paid out of the drawer: ${formatCents(paidOut)}`);
+  if (r.overShort) {
+    out.push(`Expected in drawer: ${formatCents(r.overShort.expected)} (float + cash sales${paidOut > 0 ? ' - paid-outs' : ''})`);
+    out.push(r.overShort.diff === 0 ? 'Balanced ($0.00)' : `${r.overShort.label} ${formatCents(Math.abs(r.overShort.diff))}`);
+  }
   if (r.hasFloat) {
     if (r.missing > 0) out.push(`Note: only ${formatCents(floatCents - r.missing)} of the ${formatCents(floatCents)} float can be left in the drawer.`);
     const keepLines = lineList(r.keep), pullLines = lineList(r.pull);
     out.push('', 'Leave in the drawer:', ...(keepLines.length ? keepLines.map((l) => '  ' + l) : ['  Nothing']));
-    out.push('', 'Pull for the deposit:', ...(pullLines.length ? pullLines.map((l) => '  ' + l) : ['  Nothing']));
+    out.push('', 'Take out for the deposit:', ...(pullLines.length ? pullLines.map((l) => '  ' + l) : ['  Nothing']));
   }
   out.push('', 'Counted by: ____________________   Checked by: ____________________');
   return out.join('\n');

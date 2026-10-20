@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
+import { FLOAT_PLANS } from '../src/data/floatplans.js';
+import { STEPS } from '../src/data/steps.js';
 import {
   DENOMS, MAX_FLOAT_BILL_CENTS, parseMoney, parseCents, formatCents, grandTotal,
-  pickFloat, deposit, overShort, drawerResult, buildSummary,
+  pickFloat, deposit, overShort, expectedCash, drawerResult, buildSummary,
 } from '../src/lib/drawer.js';
 
 const byId = Object.fromEntries(DENOMS.map((d) => [d.id, d]));
@@ -36,9 +38,11 @@ eq(grandTotal({ c1: 3, c10: 3 }), 33);
 eq(grandTotal({}), 0);
 eq(grandTotal({ r25: 1, r10: 1, r5: 1, r1: 1 }), 1750);
 eq(grandTotal({ c100: 3, b1: 2 }), 500);
-eq(DENOMS.length, 16);
+eq(DENOMS.length, 17);
 const allOne = Object.fromEntries(DENOMS.map((d) => [d.id, 1]));
-eq(grandTotal(allOne), 20691 + 0, 'one of every row');
+eq(grandTotal(allOne), 20741, 'one of every row, with the half dollar');
+eq(grandTotal({ c50: 3 }), 150, 'half dollars');
+eq(byId.c50.group, 'More coins');
 
 // ---- worked example (article)
 const ex = { b100: 2, b50: 3, b20: 20, b10: 15, b5: 30, b1: 40, c25: 20, c10: 15, c5: 10, c1: 25 };
@@ -47,7 +51,7 @@ const rEx = drawerResult(ex, 20000, 89000);
 eq(rEx.total, 109725);
 eq(rEx.depositCents, 89725);
 eq(rEx.missing, 0);
-eq(rEx.overShort, { diff: 725, label: 'Over' });
+eq(rEx.overShort, { diff: 725, expected: 109000, label: 'Over' });
 eq(grandTotal(rEx.keep), 20000);
 console.log('float for the worked example:', JSON.stringify(rEx.keep));
 
@@ -102,13 +106,19 @@ eq(deposit({ b20: 2, c1: 3 }, { b20: 1 }), { b20: 1, c1: 3 });
 }
 
 // ---- over and short
-eq(overShort(1000, 200, 800), { diff: 0, label: 'Balanced' });
-eq(overShort(1000, 200, 700), { diff: 100, label: 'Over' });
-eq(overShort(1000, 200, 900), { diff: -100, label: 'Short' });
-eq(overShort(100, 200, 0), { diff: -100, label: 'Short' }, 'float larger than drawer');
+eq(overShort(1000, 200, 800), { diff: 0, expected: 1000, label: 'Balanced' });
+eq(overShort(1000, 200, 700), { diff: 100, expected: 900, label: 'Over' });
+eq(overShort(1000, 200, 900), { diff: -100, expected: 1100, label: 'Short' });
+eq(overShort(100, 200, 0), { diff: -100, expected: 200, label: 'Short' }, 'float larger than drawer');
 eq(overShort(1000, null, 500), null, 'no float, no over or short');
 eq(overShort(1000, 200, null), null, 'no sales, no over or short');
-eq(overShort(1000, 0, 1000), { diff: 0, label: 'Balanced' }, 'zero float is a real float');
+eq(overShort(1000, 0, 1000), { diff: 0, expected: 1000, label: 'Balanced' }, 'zero float is a real float');
+// paid-outs: expected cash = float + sales - paid-outs (page example: 200 + 640 - 20 = 820, counted 812.50)
+eq(expectedCash(20000, 64000, 2000), 82000);
+eq(overShort(81250, 20000, 64000, 2000), { diff: -750, expected: 82000, label: 'Short' });
+eq(overShort(81250, 20000, 64000), { diff: -2750, expected: 84000, label: 'Short' }, 'no paid-outs entered');
+eq(overShort(84000, 20000, 64000, 0), { diff: 0, expected: 84000, label: 'Balanced' });
+eq(drawerResult({ b20: 41 }, 20000, 64000, 2000).overShort.diff, 0, 'drawer result passes paid-outs');
 
 // ---- no float entered
 {
@@ -124,13 +134,36 @@ eq(overShort(1000, 0, 1000), { diff: 0, label: 'Balanced' }, 'zero float is a re
   assert.ok(s.includes('Total in drawer: $1,097.25')); 
   assert.ok(s.includes('Cash to deposit: $897.25'));
   assert.ok(s.includes('Over $7.25'));
-  assert.ok(s.includes('Leave in the drawer:') && s.includes('Pull for the deposit:'));
+  assert.ok(s.includes('Leave in the drawer:') && s.includes('Take out for the deposit:'));
   assert.ok(s.includes('Counted by:'));
   assert.ok(!buildSummary(ex, null, null, 'T').includes('Cash to deposit'));
   const short = buildSummary({ b100: 3 }, 20000, null, 'T');
   assert.ok(short.includes('Cash to deposit: $300.00'));
   assert.ok(short.includes('only $0.00 of the $200.00 float'));
   checks += 8;
+  const m = buildSummary(ex, 20000, 89000, 'T', { cashier: 'Sam', register: '2', paidOutCents: 500 });
+  assert.ok(m.includes('Cashier: Sam') && m.includes('Register: 2'));
+  assert.ok(m.includes('Paid out of the drawer: $5.00'));
+  assert.ok(m.includes('Expected in drawer: $1,085.00 (float + cash sales - paid-outs)'));
+  assert.ok(m.includes('Over $12.25'));
+  assert.ok(!s.includes('Cashier:') && !s.includes('Paid out'), 'optional lines hidden when empty');
+  checks += 5;
+}
+
+// ---- float plans on the guide pages add up to their float
+for (const [key, p] of Object.entries(FLOAT_PLANS)) {
+  eq(grandTotal(p.counts), p.cents, `float plan ${key} adds up`);
+  for (const id of Object.keys(p.counts)) assert.ok(byId[id], `known row ${id}`);
+}
+eq(STEPS.length, 6);
+
+// ---- half dollars can be part of the float
+{
+  const r = drawerResult({ c50: 4, b20: 1 }, 2000, null);
+  eq(r.keep, { b20: 1 });
+  const r2 = drawerResult({ c50: 4, c10: 1 }, 210, null);
+  eq(r2.missing, 0);
+  eq(r2.keep, { c50: 4, c10: 1 });
 }
 
 // ---- property tests: fixed seed

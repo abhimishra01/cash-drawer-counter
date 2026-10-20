@@ -50,3 +50,27 @@
 18. Blind cash drawer count explained
 19. Two-person cash count policy template
 20. Change order calculator (small bills and coin rolls to get from the bank)
+
+## Gap fix (Wanda, 2026-10-20)
+Source: `~/Desktop/personal/microtools/comparison/cash-drawer-counter.md`.
+
+### Done
+- **Must 1, blank printable count sheet:** new page `/cash-register-count-sheet/` with a "Print blank sheet" button, opening and closing columns, over and short block, date, cashier, register, shift and signature lines. Prints on one Letter page (checked with a PDF, 1 page). The home page has a "Cash register count sheet" H2 (`#count-sheet`) that links to it, and the tool links to it too.
+- **Must 2, cashier and register on the filled sheet:** optional "Sheet details" fields, remembered on the device (localStorage in try/catch), shown in Copy and Print. The date is the time stamp already on the sheet.
+- **Must 3, half dollars:** new row under a closed "More coins" fold (opens by itself when a saved count has half dollars). Enter skips the fold when closed. Counts toward totals and the float search.
+- **Should 4, paid-outs:** "Paid out of the drawer" field. Expected = float + cash sales - paid-outs, shown under the over/short result and in the summary. `overShort` and `drawerResult` take the new argument; tested.
+- **Should 5, count as float:** "Use this count as my float" link under the float field.
+- **Should 6, synonyms:** till count, register balance, cashing up, close out, cash drop in headings and copy on the home page and guide pages.
+- **Should 7, labels:** "Pull for the deposit" is now "Take out for the deposit" (screen, summary, article). Green check "Leaves exactly $X" when the leave list equals the float.
+- **Should 8, print:** summary print is 12px monospace and fits one Letter page with all 17 rows plus long leave and take-out lists (PDF check, 1 page); `@page` Letter with half-inch margins. "Save as PDF" hint added next to Print and on the blank sheet page.
+- **Nice 13, HowTo schema** for the six steps (steps live in `src/data/steps.js`, shared with the article).
+- **10 SEO pages (all real, pre-rendered, linked from the home page and from each other, preset float in the tool, own title, H1, text, table or list, FAQ and FAQPage schema):** cash-register-count-sheet, cash-drawer-float-calculator, how-much-to-leave-in-cash-drawer, cash-drawer-over-short-calculator, cash-drop-calculator, cash-drawer-count-with-rolls, coffee-shop-cash-drawer-count, food-truck-cash-drawer-count, close-out-register-checklist, bar-cash-drawer-count. Float tables on the pages are checked by `npm test` to add up to their float.
+- Tests: 2,939 checks pass (new: half dollar, expected cash, paid-outs, summary lines, float plans). `npm run build`: 16 pages. Pages build stays noindex.
+
+### Skipped, with reason
+- **Nice 9 (several drawers as tabs), 10 (CSV download), 11 (checks and card slips line):** each adds state or a second job. Not single-purpose. Bar page tells people to copy or print each drawer, then Reset.
+- **Nice 12 (Next: float button on the keypad):** Enter already goes to the float field after the last row.
+- **Nice 14:** already true (no ads, no signup, privacy line).
+- Hand-written float table for "bills to leave" as its own page: merged into the float page to avoid a thin duplicate.
+- Backlinks and a fresh domain: not code. Still the main ranking limit.
+- Lighthouse (Google Chrome, desktop defaults): 100 on all four for home, count sheet and over/short pages. LCP about 1.0 s.

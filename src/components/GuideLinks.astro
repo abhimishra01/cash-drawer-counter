@@ -1,0 +1,14 @@
+---
+import { guides } from '../data/guides.ts';
+import { url } from '../lib/url.ts';
+interface Props { current?: string; heading?: string; slugs?: string[]; }
+const { current = '', heading = 'More ways to count the drawer', slugs } = Astro.props;
+const all = [{ slug: 'cash-register-count-sheet', linkLabel: 'Cash register count sheet (printable)' }, ...guides];
+const list = (slugs ? all.filter((g) => slugs.includes(g.slug)) : all).filter((g) => g.slug !== current);
+---
+<nav aria-labelledby="guides-h" class="mx-auto max-w-5xl px-4 pt-16">
+  <h2 id="guides-h" class="text-2xl font-bold tracking-tight">{heading}</h2>
+  <ul class="mt-4 grid max-w-3xl gap-x-8 gap-y-1 sm:grid-cols-2">
+    {list.map((g) => <li><a href={url(`${g.slug}/`)} class="inline-block py-1.5 font-medium text-brand-ink underline underline-offset-4">{g.linkLabel}</a></li>)}
+  </ul>
+</nav>
