@@ -236,6 +236,7 @@ const small = 'block rounded-xl border border-edge bg-paper px-3 text-base outli
           el.value = el.dataset.prev ?? '';
           status('Counts are whole numbers. Use digits only, up to 6.');
         }
+        if (/^0\d/.test(el.value)) el.value = String(parseInt(el.value, 10)); // no leading zeros
         el.dataset.prev = el.value;
         saveCounts();
       }
