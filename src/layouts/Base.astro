@@ -4,13 +4,16 @@ import site from '../site.config.ts';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Analytics from '../components/Analytics.astro';
+import { url, stripBase } from '../lib/url.ts';
 
 interface Props { fullTitle?: string; title?: string; description?: string; jsonLd?: object[]; noindex?: boolean; }
 const { fullTitle: titleOverride, title, description = site.description, jsonLd = [], noindex = false } = Astro.props;
 const fullTitle = titleOverride ?? (title ? `${title} | ${site.name}` : `${site.name}: ${site.keyword}`);
 const base = `https://${site.domain}`;
-const canonical = new URL(Astro.url.pathname, base).href;
-const image = site.ogImage ? new URL(site.ogImage, base).href : '';
+// Canonical always names the real domain, even when the site is served from a base path.
+const canonical = new URL(stripBase(Astro.url.pathname), base).href;
+// The share image must load from wherever this build is served.
+const image = site.ogImage ? new URL(url(site.ogImage), Astro.site).href : '';
 ---
 <!doctype html>
 <html lang={site.locale} data-theme="light" style={`--brand:${site.brand}`}>
@@ -25,15 +28,14 @@ const image = site.ogImage ? new URL(site.ogImage, base).href : '';
     </script>
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="keywords" content={[site.keyword, ...site.keywords].join(', ')} />
     <meta name="theme-color" content={site.brand} />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/site.webmanifest" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href={url('favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={url('favicon-32.png')} type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href={url('apple-touch-icon.png')} />
+    <link rel="manifest" href={url('site.webmanifest')} />
+    <link rel="sitemap" href={url('sitemap-index.xml')} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />
@@ -45,7 +47,7 @@ const image = site.ogImage ? new URL(site.ogImage, base).href : '';
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     {image && <meta name="twitter:image" content={image} />}
-    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d)} />)}
+    {jsonLd.map((d) => <script type="application/ld+json" set:html={JSON.stringify(d).replace(/</g, '\\u003c')} />)}
     <Analytics />
   </head>
   <body class="min-h-screen antialiased">

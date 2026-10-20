@@ -6,13 +6,13 @@ export default {
   cloudflareProject: 'cash-drawer-counter',    // Cloudflare Pages project name (used by npm run deploy)
   keyword: 'count the drawer calculator',            // main keyword: goes in the H1 and title
   keywords: ['cash drawer calculator', 'till counter calculator', 'cash register counter', 'drawer count sheet', 'cash deposit calculator'], // supporting keywords
-  tagline: 'Free, fast and private',  // short line used in the title after the keyword
+  tagline: 'Free, fast and private',  // short line shown in the pill above the H1
   description:
     'Count your cash drawer at shift end. Enter bills, coins and rolls, set your float, and see the deposit and which bills to pull. Free and private.',
-  email: 'hello@countthedrawercalculator.com',       // contact email (shown on Contact and Privacy pages)
+  email: 'hello@countthedrawercalculator.com',       // contact email (shown on the Contact, Privacy and Terms pages)
   ga4: '',                            // GA4 measurement ID, e.g. 'G-XXXXXXXXXX'. Empty = Google Analytics off
   adsense: '',                        // AdSense publisher ID, e.g. 'ca-pub-1234567890123456'. Empty = ads off
-  brand: '#15803d',                   // brand colour (hex)
+  brand: '#15803d',                   // brand color (hex)
   locale: 'en-US',                    // BCP 47 language tag
   ogImage: '/og.png',                        // e.g. '/og.png' (1200x630 file in public/). Empty = no image
   category: 'UtilitiesApplication',   // schema.org applicationCategory

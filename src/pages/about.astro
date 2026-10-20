@@ -1,6 +1,7 @@
 ---
 import Page from '../layouts/Page.astro';
 import site from '../site.config.ts';
+import { url } from '../lib/url.ts';
 ---
 <Page title="About" description={`About ${site.name}, a free cash drawer calculator for shop and cafe staff.`}>
   <p>{site.name} is a free tool that counts a cash register drawer at the end of a shift. You enter how many bills, coins and rolls you have. It shows the total, the cash to deposit, and which bills to pull so the float stays in the drawer.</p>
@@ -9,7 +10,7 @@ import site from '../site.config.ts';
   <h2>Why we built it</h2>
   <p>Many drawer calculators are slow, crowded with ads, or hard to use with one hand. We wanted one with big buttons and a number keypad that gives the answer as you type, with no submit button.</p>
   <h2>How it works</h2>
-  <p>All maths runs in your browser in whole cents, so there are no rounding errors. Your counts are not sent anywhere. We do not ask you to create an account. The tool saves only your last float on your own device.</p>
+  <p>All math runs in your browser in whole cents, so there are no rounding errors. Your counts are not sent anywhere. We do not ask you to create an account. The tool saves your last float and your current counts on your own device, so a refresh does not lose them.</p>
   <h2>Contact</h2>
-  <p>Questions or ideas? Write to <a href={`mailto:${site.email}`}>{site.email}</a> or visit the <a href="/contact/">Contact page</a>.</p>
+  <p>Questions or ideas? Write to <a href={`mailto:${site.email}`}>{site.email}</a> or visit the <a href={url('/contact/')}>Contact page</a>.</p>
 </Page>
