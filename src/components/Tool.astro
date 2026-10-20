@@ -1,7 +1,7 @@
 ---
 import { DENOMS } from '../lib/drawer.js';
 const groups = ['Bills', 'Coins', 'Rolls'].map((g) => ({ name: g, rows: DENOMS.filter((d) => d.group === g) }));
-const field = 'block rounded-xl border border-line bg-paper px-3 text-lg font-semibold tabular-nums outline-none focus:border-brand focus:ring-2 focus:ring-brand/30';
+const field = 'block rounded-xl border border-line bg-paper px-3 text-lg font-semibold tabular-nums outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 aria-[invalid=true]:border-red-600';
 const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-paper text-2xl font-bold leading-none select-none active:bg-brand-soft hover:bg-brand-soft';
 ---
 <section id="tool" aria-label="Cash drawer counter" class="rounded-2xl border border-line bg-card p-4 sm:shadow-[6px_6px_0_0_var(--line)] sm:p-6">
@@ -14,9 +14,9 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
             {g.rows.map((d) => (
               <div class="grid grid-cols-[1fr_auto_auto_auto] items-center gap-x-2 sm:grid-cols-[1fr_auto_auto_auto_6rem]" data-row={d.id}>
                 <label for={`in-${d.id}`} class="col-start-1 row-start-1 min-w-0 self-end text-sm font-medium leading-tight sm:self-center sm:text-base">{d.label}</label>
-                <button type="button" class={step} data-step="-1" data-for={d.id} aria-label={`One fewer ${d.label}`}>&minus;</button>
+                <button type="button" tabindex="-1" class={step} data-step="-1" data-for={d.id} aria-label={`One fewer ${d.label}`}>&minus;</button>
                 <input id={`in-${d.id}`} data-count={d.id} type="text" inputmode="numeric" pattern="[0-9]*" enterkeyhint="next" autocomplete="off" placeholder="0" class={`${field} row-span-2 sm:row-span-1 h-12 w-16 text-center sm:w-20`} />
-                <button type="button" class={step} data-step="1" data-for={d.id} aria-label={`One more ${d.label}`}>+</button>
+                <button type="button" tabindex="-1" class={step} data-step="1" data-for={d.id} aria-label={`One more ${d.label}`}>+</button>
                 <output data-total={d.id} class="col-start-1 row-start-2 self-start font-mono text-xs tabular-nums text-muted sm:col-start-5 sm:row-start-1 sm:self-center sm:text-right sm:text-sm">$0.00</output>
               </div>
             ))}
@@ -30,25 +30,41 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
         <p class="text-xs font-medium text-muted">Total in drawer</p>
         <p id="grand" class="font-mono text-4xl font-extrabold tabular-nums text-brand-ink" aria-live="polite">$0.00</p>
       </div>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-2 items-start gap-3">
         <div>
-          <label for="float" class="text-sm font-semibold">Starting float</label>
-          <input id="float" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" placeholder="200.00" class={`${field} mt-1 h-12 w-full`} />
+          <label for="float" class="block text-sm font-semibold">Starting float</label>
+          <div class="relative mt-1">
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted" aria-hidden="true">$</span>
+            <input id="float" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" maxlength="12" placeholder="e.g. 200" aria-describedby="float-hint float-err" class={`${field} h-12 w-full pl-7`} />
+          </div>
+          <p id="float-hint" class="mt-1 text-xs text-muted">Cash you leave for the next shift. Enter 0 if none.</p>
+          <p id="float-err" class="mt-1 hidden text-xs font-medium text-red-700 dark:text-red-400" role="alert">Enter dollars and cents, like 200.00</p>
         </div>
         <div>
-          <label for="sales" class="text-sm font-semibold">Expected sales <span class="font-normal text-muted">(optional)</span></label>
-          <input id="sales" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="0.00" class={`${field} mt-1 h-12 w-full`} />
+          <label for="sales" class="block text-sm font-semibold">Expected cash sales</label>
+          <div class="relative mt-1">
+            <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-muted" aria-hidden="true">$</span>
+            <input id="sales" type="text" inputmode="decimal" enterkeyhint="done" autocomplete="off" maxlength="12" placeholder="optional" aria-describedby="sales-hint sales-err" class={`${field} h-12 w-full pl-7`} />
+          </div>
+          <p id="sales-hint" class="mt-1 text-xs text-muted">Cash sales only, from your register report. Not card sales.</p>
+          <p id="sales-err" class="mt-1 hidden text-xs font-medium text-red-700 dark:text-red-400" role="alert">Enter dollars and cents, like 890.00</p>
         </div>
       </div>
       <div id="results" class="space-y-3 rounded-xl border border-line p-4" aria-live="polite">
-        <div class="flex items-baseline justify-between gap-3"><span class="text-sm font-semibold">Cash to deposit</span><span id="dep" class="font-mono text-2xl font-bold tabular-nums">$0.00</span></div>
+        <div class="flex items-baseline justify-between gap-3"><span class="text-sm font-semibold">Cash to deposit</span><span id="dep" class="font-mono text-2xl font-bold tabular-nums">&mdash;</span></div>
         <div id="ovs-wrap" class="hidden flex-wrap items-baseline justify-between gap-3"><span id="ovs-label" class="text-sm font-semibold"></span><span id="ovs" class="font-mono text-xl font-bold tabular-nums"></span></div>
-        <div id="pull-wrap" class="hidden border-t border-line pt-3">
-          <p class="text-sm font-semibold">Pull for the deposit</p>
-          <ul id="pull" class="mt-1 space-y-0.5 text-sm tabular-nums"></ul>
-          <p id="pull-note" class="mt-2 text-sm text-red-700 dark:text-red-400"></p>
+        <div id="pull-wrap" class="hidden space-y-3 border-t border-line pt-3">
+          <div>
+            <p class="text-sm font-semibold">Leave in the drawer</p>
+            <ul id="keep" class="mt-1 space-y-0.5 text-sm tabular-nums"></ul>
+          </div>
+          <div>
+            <p class="text-sm font-semibold">Pull for the deposit</p>
+            <ul id="pull" class="mt-1 space-y-0.5 text-sm tabular-nums"></ul>
+          </div>
+          <p id="pull-note" class="text-sm font-medium text-red-700 dark:text-red-400"></p>
         </div>
-        <p id="hint" class="text-sm text-muted">Enter a starting float to see what to pull and what to leave.</p>
+        <p id="hint" class="text-sm text-muted">Enter your starting float to see the deposit and what to leave.</p>
       </div>
       <div class="flex flex-wrap gap-2">
         <button type="button" id="copy" class="h-12 flex-1 rounded-xl bg-brand px-4 font-semibold text-white hover:opacity-90">Copy summary</button>
@@ -58,7 +74,7 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
       <p id="status" class="min-h-5 text-sm text-muted" role="status"></p>
     </div>
   </div>
-  <div class="fixed inset-x-0 bottom-0 z-10 flex items-baseline justify-between border-t border-line bg-card/95 px-4 py-2 backdrop-blur lg:hidden" aria-hidden="true">
+  <div id="bar" class="fixed inset-x-0 bottom-0 z-10 flex items-baseline justify-between border-t border-line bg-card/95 px-4 py-2 backdrop-blur lg:hidden" aria-hidden="true">
     <span class="text-sm font-medium text-muted">Total in drawer</span>
     <span id="grand-bar" class="font-mono text-xl font-extrabold tabular-nums text-brand-ink">$0.00</span>
   </div>
@@ -68,104 +84,129 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
 <style is:global>
   .print-only { display: none; }
   @media print {
-    body * { visibility: hidden !important; }
-    #sheet, #sheet * { visibility: visible !important; }
-    #sheet { display: block; position: absolute; left: 0; top: 0; font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; color: #000; white-space: pre-wrap; }
+    html, body { background: #fff !important; }
+    body > :not(#sheet) { display: none !important; }
+    #sheet { display: block; margin: 0; font: 14px/1.5 ui-monospace, Menlo, Consolas, monospace; color: #000; white-space: pre-wrap; }
   }
   #ovs-wrap.flex { display: flex; }
 </style>
 
 <script>
-  import { DENOMS, parseCents, formatCents, grandTotal, pickFloat, deposit } from '../lib/drawer.js';
+  import { DENOMS, MAX_COUNT, parseMoney, formatCents, grandTotal, rowTotal, drawerResult, describeCounts, buildSummary } from '../lib/drawer.js';
 
   const $ = (id: string) => document.getElementById(id)!;
   const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('[data-count]'));
   const floatEl = $('float') as HTMLInputElement;
   const salesEl = $('sales') as HTMLInputElement;
-  const KEY = 'cdc-float';
+  const FLOAT_KEY = 'cdc-float';
+  const COUNTS_KEY = 'cdc-counts';
+  const GOOD = 'text-green-700 dark:text-green-400';
+  const BAD = 'text-red-700 dark:text-red-400';
+
+  // The print sheet sits directly under <body> so print CSS can hide everything else.
+  document.body.appendChild($('sheet'));
 
   const counts = (): Record<string, number> => {
     const c: Record<string, number> = {};
-    for (const i of inputs) c[i.dataset.count!] = parseInt(i.value.replace(/\D/g, ''), 10) || 0;
+    for (const i of inputs) c[i.dataset.count!] = parseInt(i.value, 10) || 0;
     return c;
   };
-  const label = (id: string) => DENOMS.find((d) => d.id === id)!.label;
-  const lines = (m: Record<string, number>) =>
-    DENOMS.filter((d) => m[d.id]).map((d) => `${m[d.id]} x ${d.label}`);
+  const rowOutput = new Map(DENOMS.map((d) => [d.id, document.querySelector<HTMLElement>(`[data-total="${d.id}"]`)!]));
+  const setText = (el: HTMLElement, t: string) => { if (el.textContent !== t) el.textContent = t; };
+  const fillList = (ul: HTMLElement, m: Record<string, number>) => {
+    ul.replaceChildren();
+    const lines = describeCounts(m);
+    for (const t of lines.length ? lines : ['Nothing']) { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
+  };
 
-  let summaryText = '';
+  /** Current float and sales. `blocked` is true when a filled field is not a valid amount. */
+  function readMoney() {
+    const fm = parseMoney(floatEl.value), sm = parseMoney(salesEl.value);
+    return { flt: fm.cents, sales: sm.cents, fBad: fm.status === 'invalid', sBad: sm.status === 'invalid' };
+  }
 
   function update() {
     const c = counts();
-    for (const d of DENOMS) $(`in-${d.id}`).parentElement!.querySelector<HTMLElement>('[data-total]')!.textContent = formatCents(d.cents * c[d.id]);
+    for (const d of DENOMS) setText(rowOutput.get(d.id)!, formatCents(rowTotal(d, c[d.id])));
     const total = grandTotal(c);
-    $('grand').textContent = formatCents(total);
-    $('grand-bar').textContent = formatCents(total);
+    setText($('grand'), formatCents(total));
+    setText($('grand-bar'), formatCents(total));
 
-    const flt = parseCents(floatEl.value);
-    const sales = parseCents(salesEl.value);
+    const { flt, sales, fBad, sBad } = readMoney();
+    for (const [el, bad, err] of [[floatEl, fBad, 'float-err'], [salesEl, sBad, 'sales-err']] as const) {
+      el.setAttribute('aria-invalid', String(bad));
+      $(err).classList.toggle('hidden', !bad);
+    }
+    const blocked = fBad || sBad;
     const pullWrap = $('pull-wrap'), hint = $('hint'), note = $('pull-note');
-    let dep = total, pickInfo: ReturnType<typeof pickFloat> | null = null, pulled: Record<string, number> = {};
-    if (flt !== null) {
-      dep = Math.max(0, total - flt);
-      pickInfo = pickFloat(c, flt);
-      pulled = deposit(c, pickInfo.keep);
-      const ul = $('pull'); ul.innerHTML = '';
-      for (const t of lines(pulled)) { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); }
-      if (!ul.children.length) { const li = document.createElement('li'); li.textContent = 'Nothing to pull.'; ul.appendChild(li); }
-      note.textContent = total < flt
-        ? `The drawer is ${formatCents(flt - total)} under the float.`
-        : pickInfo.missing > 0 ? `Cannot make the float exactly with this cash. ${formatCents(pickInfo.missing)} short; adjust by hand.` : '';
+    const ovsWrap = $('ovs-wrap'), ovs = $('ovs');
+    const r = drawerResult(c, blocked ? null : flt, blocked ? null : sales);
+
+    if (blocked) {
+      setText($('dep'), '\u2014');
+      pullWrap.classList.add('hidden'); ovsWrap.classList.add('hidden'); ovsWrap.classList.remove('flex');
+      setText(hint, 'Fix the amount marked in red to see the result.'); hint.classList.remove('hidden');
+      return;
+    }
+    if (r.hasFloat) {
+      setText($('dep'), formatCents(r.depositCents!));
+      fillList($('keep'), r.keep); fillList($('pull'), r.pull);
+      const notes: string[] = [];
+      if (r.underFloat) notes.push(`The drawer is ${formatCents(flt! - total)} under the float.`);
+      if (r.missing > 0) notes.push(`Only ${formatCents(flt! - r.missing)} of the ${formatCents(flt!)} float can be left in the drawer. Bills above $20 never stay as float. Add change or break a bill by hand.`);
+      setText(note, notes.join(' '));
       pullWrap.classList.remove('hidden'); hint.classList.add('hidden');
     } else {
-      pullWrap.classList.add('hidden'); hint.classList.remove('hidden');
+      setText($('dep'), '\u2014');
+      pullWrap.classList.add('hidden');
+      setText(hint, sales !== null ? 'Add your float (0 if none) to see the deposit and over or short.' : 'Enter your starting float to see the deposit and what to leave.');
+      hint.classList.remove('hidden');
     }
-    $('dep').textContent = formatCents(dep);
-
-    const ovsWrap = $('ovs-wrap'), ovs = $('ovs'), ovsLabel = $('ovs-label');
-    let diffText = '';
-    if (sales !== null && flt !== null) {
-      const diff = total - flt - sales;
+    if (r.overShort) {
+      const o = r.overShort;
       ovsWrap.classList.add('flex'); ovsWrap.classList.remove('hidden');
-      ovs.className = 'font-mono text-xl font-bold tabular-nums ' + (diff === 0 ? 'text-green-700 dark:text-green-400' : diff > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400');
-      ovsLabel.textContent = diff === 0 ? 'Balanced' : diff > 0 ? 'Over' : 'Short';
-      ovs.textContent = diff === 0 ? '$0.00' : formatCents(Math.abs(diff));
-      diffText = diff === 0 ? 'Balanced ($0.00)' : `${diff > 0 ? 'Over' : 'Short'} ${formatCents(Math.abs(diff))}`;
-    } else if (sales !== null) {
-      ovsWrap.classList.add('flex'); ovsWrap.classList.remove('hidden');
-      const diff = total - sales;
-      ovs.className = 'font-mono text-xl font-bold tabular-nums ' + (diff >= 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400');
-      ovsLabel.textContent = diff === 0 ? 'Balanced' : diff > 0 ? 'Over' : 'Short';
-      ovs.textContent = diff === 0 ? '$0.00' : formatCents(Math.abs(diff));
-      diffText = diff === 0 ? 'Balanced ($0.00)' : `${diff > 0 ? 'Over' : 'Short'} ${formatCents(Math.abs(diff))}`;
+      ovs.className = `font-mono text-xl font-bold tabular-nums ${o.diff >= 0 ? GOOD : BAD}`;
+      setText($('ovs-label'), o.label);
+      setText(ovs, o.diff === 0 ? '$0.00' : formatCents(Math.abs(o.diff)));
     } else { ovsWrap.classList.add('hidden'); ovsWrap.classList.remove('flex'); }
-
-    const out = ['CASH DRAWER COUNT', new Date().toLocaleString('en-US'), ''];
-    out.push(...DENOMS.filter((d) => c[d.id]).map((d) => `${label(d.id).padEnd(22)} ${String(c[d.id]).padStart(4)}  ${formatCents(d.cents * c[d.id]).padStart(11)}`));
-    out.push('', `Total in drawer: ${formatCents(total)}`);
-    if (flt !== null) out.push(`Starting float: ${formatCents(flt)}`);
-    out.push(`Cash to deposit: ${formatCents(dep)}`);
-    if (sales !== null) out.push(`Expected sales: ${formatCents(sales)}`);
-    if (diffText) out.push(diffText);
-    if (flt !== null && Object.keys(pulled).length) out.push('', 'Pull for the deposit:', ...lines(pulled).map((l) => '  ' + l));
-    summaryText = out.join('\n');
-    $('sheet').textContent = summaryText;
   }
+
+  const saveCounts = () => {
+    try { localStorage.setItem(COUNTS_KEY, JSON.stringify(counts())); } catch {}
+  };
 
   function stepRow(id: string, delta: number) {
     const el = $(`in-${id}`) as HTMLInputElement;
-    el.value = String(Math.max(0, (parseInt(el.value, 10) || 0) + delta));
-    update();
+    const next = Math.min(MAX_COUNT, Math.max(0, (parseInt(el.value, 10) || 0) + delta));
+    el.value = next === 0 && !el.value ? '' : String(next);
+    el.dataset.prev = el.value;
+    saveCounts(); update();
   }
 
   document.querySelectorAll<HTMLButtonElement>('[data-step]').forEach((b) =>
     b.addEventListener('click', () => stepRow(b.dataset.for!, parseInt(b.dataset.step!, 10))));
 
+  let statusTimer = 0;
+  const status = (t: string, ms = 4000) => {
+    $('status').textContent = t;
+    clearTimeout(statusTimer);
+    statusTimer = window.setTimeout(() => { $('status').textContent = ''; }, ms);
+  };
+
   const order: HTMLInputElement[] = [...inputs, floatEl, salesEl];
   order.forEach((el, i) => {
+    el.dataset.prev = '';
     el.addEventListener('input', () => {
-      if (el.dataset.count) el.value = el.value.replace(/\D/g, '').slice(0, 6);
-      if (el === floatEl) { try { localStorage.setItem(KEY, el.value); } catch {} }
+      if (el.dataset.count) {
+        // Counts are whole numbers. Reject anything else instead of changing it quietly.
+        if (!/^\d{0,6}$/.test(el.value)) {
+          el.value = el.dataset.prev ?? '';
+          status('Counts are whole numbers. Use digits only, up to 6.');
+        }
+        el.dataset.prev = el.value;
+        saveCounts();
+      }
+      if (el === floatEl) { try { localStorage.setItem(FLOAT_KEY, el.value); } catch {} }
       update();
     });
     el.addEventListener('keydown', (e) => {
@@ -176,17 +217,55 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
     el.addEventListener('focus', () => el.select());
   });
 
-  const status = (t: string) => { $('status').textContent = t; setTimeout(() => { if ($('status').textContent === t) $('status').textContent = ''; }, 3000); };
+  /** The count sheet, with the time of the press. Null when a money field is not valid. */
+  function sheetText(): string | null {
+    const { flt, sales, fBad, sBad } = readMoney();
+    if (fBad || sBad) { status('Fix the amount marked in red first.'); return null; }
+    return buildSummary(counts(), flt, sales, new Date().toLocaleString('en-US'));
+  }
+
   $('copy').addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(summaryText); status('Summary copied.'); }
+    const t = sheetText();
+    if (t === null) return;
+    try { await navigator.clipboard.writeText(t); status('Summary copied.'); }
     catch { status('Could not copy. Use Print instead.'); }
   });
-  $('print').addEventListener('click', () => window.print());
-  $('reset').addEventListener('click', () => {
-    inputs.forEach((i) => (i.value = '')); salesEl.value = '';
-    update(); status('Counts cleared. The float is kept.');
+  $('print').addEventListener('click', () => {
+    const t = sheetText();
+    if (t === null) return;
+    $('sheet').textContent = t;
+    window.print();
   });
 
-  try { const f = localStorage.getItem(KEY); if (f) floatEl.value = f; } catch {}
+  // Reset needs two taps, so one slip does not lose a long count.
+  const resetBtn = $('reset');
+  let resetTimer = 0;
+  const disarm = () => { resetBtn.textContent = 'Reset'; resetBtn.removeAttribute('data-armed'); };
+  resetBtn.addEventListener('click', () => {
+    if (!resetBtn.dataset.armed) {
+      resetBtn.dataset.armed = '1'; resetBtn.textContent = 'Tap again to clear';
+      resetTimer = window.setTimeout(disarm, 3000);
+      return;
+    }
+    clearTimeout(resetTimer); disarm();
+    inputs.forEach((i) => { i.value = ''; i.dataset.prev = ''; }); salesEl.value = '';
+    saveCounts(); update();
+    status('Counts and expected sales cleared. The float is kept.', 8000);
+  });
+
+  // Show the sticky total bar only while the tool is on screen.
+  const bar = $('bar');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => { bar.style.display = e.isIntersecting ? '' : 'none'; }, { threshold: 0 }).observe($('tool'));
+  }
+
+  try {
+    const f = localStorage.getItem(FLOAT_KEY); if (f) floatEl.value = f;
+    const saved = JSON.parse(localStorage.getItem(COUNTS_KEY) || '{}');
+    for (const i of inputs) {
+      const n = Number(saved[i.dataset.count!]);
+      if (Number.isInteger(n) && n > 0 && n <= MAX_COUNT) { i.value = String(n); i.dataset.prev = i.value; }
+    }
+  } catch {}
   update();
 </script>
