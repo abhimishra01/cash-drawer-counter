@@ -10,7 +10,7 @@ const faq = [
   { q: 'Does it print on one page?', a: 'Yes. The sheet is set for US Letter paper with half-inch margins and fits on one page.' },
   { q: 'Do I need the paper sheet if I use the calculator?', a: 'No. The calculator prints its own filled sheet with a signature line. Use the blank sheet when you count by hand or when your manager wants a paper form.' },
 ];
-const base = `https://${site.domain}`;
+const base = site.origin;
 const jsonLd = [
   { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) },
   { '@context': 'https://schema.org', '@type': 'WebPage', name: 'Cash register count sheet', url: `${base}/cash-register-count-sheet/`, inLanguage: site.locale },

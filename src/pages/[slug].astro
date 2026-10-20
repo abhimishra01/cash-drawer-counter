@@ -11,7 +11,7 @@ export function getStaticPaths() {
   return guides.map((g) => ({ params: { slug: g.slug }, props: { g } }));
 }
 const { g } = Astro.props as { g: Guide };
-const base = `https://${site.domain}`;
+const base = site.origin;
 const jsonLd = [
   {
     '@context': 'https://schema.org', '@type': 'WebApplication', name: g.h1, url: `${base}/${g.slug}/`, description: g.description,

@@ -12,5 +12,5 @@ import { url } from '../lib/url.ts';
   <h2>How it works</h2>
   <p>All math runs in your browser in whole cents, so there are no rounding errors. Your counts are not sent anywhere. We do not ask you to create an account. The tool saves your last float and your current counts on your own device, so a refresh does not lose them.</p>
   <h2>Contact</h2>
-  <p>Questions or ideas? Write to <a href={`mailto:${site.email}`}>{site.email}</a> or visit the <a href={url('/contact/')}>Contact page</a>.</p>
+  <p>Questions or ideas? Write to <a href={site.contactHref}>{site.contactLabel}</a> or visit the <a href={url('/contact/')}>Contact page</a>.</p>
 </Page>
