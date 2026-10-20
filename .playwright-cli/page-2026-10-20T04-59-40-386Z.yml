@@ -1,0 +1,85 @@
+- generic [active] [ref=f3e1]:
+  - link "Skip to content" [ref=f3e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - link "Demo Ruler" [ref=f3e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f3e7]:
+        - navigation "Main" [ref=f3e8]:
+          - link "Tool" [ref=f3e9] [cursor=pointer]:
+            - /url: /
+          - link "About" [ref=f3e10] [cursor=pointer]:
+            - /url: /about/
+          - link "Contact" [ref=f3e11] [cursor=pointer]:
+            - /url: /contact/
+        - button "Switch colour theme" [ref=f3e12]
+  - main [ref=f3e16]:
+    - generic [ref=f3e17]:
+      - paragraph [ref=f3e18]: Free, fast and private
+      - heading "Online ruler" [level=1] [ref=f3e19]
+      - paragraph [ref=f3e20]: A free online ruler that works in your browser. No sign-up, no install. Measure in inches or centimetres.
+      - region "Tool" [ref=f3e22]:
+        - text: Type or paste text
+        - textbox "Type or paste text" [ref=f3e23]:
+          - /placeholder: Start typing here...
+        - generic [ref=f3e24]:
+          - generic [ref=f3e25]:
+            - term [ref=f3e26]: Characters
+            - definition [ref=f3e27]: "0"
+          - generic [ref=f3e28]:
+            - term [ref=f3e29]: Words
+            - definition [ref=f3e30]: "0"
+          - generic [ref=f3e31]:
+            - term [ref=f3e32]: Lines
+            - definition [ref=f3e33]: "0"
+      - paragraph [ref=f3e34]:
+        - link "About" [ref=f3e35] [cursor=pointer]:
+          - /url: /about/
+        - text: ·
+        - link "Privacy Policy" [ref=f3e36] [cursor=pointer]:
+          - /url: /privacy/
+        - text: ·
+        - link "Terms" [ref=f3e37] [cursor=pointer]:
+          - /url: /terms/
+        - text: ·
+        - link "Contact" [ref=f3e38] [cursor=pointer]:
+          - /url: /contact/
+    - region [ref=f3e39]:
+      - article [ref=f3e40]:
+        - heading "What is the online ruler?" [level=2] [ref=f3e41]
+        - paragraph [ref=f3e42]: "Replace this block with about 600 words. Start with a plain answer to the main search: what the tool does and who it helps. Use the main keyword (online ruler) once in the first paragraph and once in a heading."
+        - heading "How to use it" [level=2] [ref=f3e43]
+        - list [ref=f3e44]:
+          - listitem [ref=f3e45]: Open the tool at the top of this page.
+          - listitem [ref=f3e46]: Enter your input.
+          - listitem [ref=f3e47]: Read or copy the result.
+        - heading "Why use this one?" [level=2] [ref=f3e48]
+        - paragraph [ref=f3e49]: "Say what makes it better than the old sites: faster, clean on a phone, dark mode, no sign-up, no ads in the way of the tool."
+        - heading "Tips and common uses" [level=2] [ref=f3e50]
+        - paragraph [ref=f3e51]: Add short, true examples. Cover the questions people also ask in Google. Link to related pages on your own site when you have them.
+    - region [ref=f3e52]:
+      - heading "Frequently asked questions" [level=2] [ref=f3e53]
+      - generic [ref=f3e54]:
+        - group [ref=f3e55]:
+          - generic "Is this tool really free?" [ref=f3e56] [cursor=pointer]
+        - group [ref=f3e59]:
+          - generic "Does it work on my phone?" [ref=f3e60] [cursor=pointer]
+        - group [ref=f3e63]:
+          - generic "Do you store my data?" [ref=f3e64] [cursor=pointer]
+        - group [ref=f3e67]:
+          - generic "Which browsers are supported?" [ref=f3e68] [cursor=pointer]
+        - group [ref=f3e71]:
+          - generic "How can I report a problem or suggest a feature?" [ref=f3e72] [cursor=pointer]
+  - contentinfo [ref=f3e75]:
+    - generic [ref=f3e76]:
+      - paragraph [ref=f3e77]: © 2026 Demo Ruler. Free to use.
+      - navigation "Footer" [ref=f3e78]:
+        - link "About" [ref=f3e79] [cursor=pointer]:
+          - /url: /about/
+        - link "Contact" [ref=f3e80] [cursor=pointer]:
+          - /url: /contact/
+        - link "Privacy Policy" [ref=f3e81] [cursor=pointer]:
+          - /url: /privacy/
+        - link "Terms" [ref=f3e82] [cursor=pointer]:
+          - /url: /terms/
