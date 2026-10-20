@@ -32,7 +32,8 @@ const jsonLd = [
   </section>
 
   <section id="sheet-wrap" class="mx-auto max-w-5xl px-4 pt-8">
-    <BlankSheet />
+    <p class="no-print mb-2 text-sm text-muted">Preview of the printed page. The boxes are blank on purpose: print the sheet and fill it in by hand.</p>
+    <div class="sheet-preview"><BlankSheet /></div>
   </section>
 
   <section class="mx-auto max-w-5xl px-4 pt-16">
@@ -61,7 +62,10 @@ const jsonLd = [
 </Base>
 
 <style is:global>
+  /* On screen the sheet is a picture of the paper form, so it must not look or act like a form. */
+  .sheet-preview { pointer-events: none; user-select: none; }
   @media print {
+    .no-print { display: none !important; }
     body > :not(main) { display: none !important; }
     main > :not(#sheet-wrap) { display: none !important; }
     html, body { background: #fff !important; }
