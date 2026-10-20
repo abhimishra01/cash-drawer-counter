@@ -1,55 +1,166 @@
 import assert from 'node:assert/strict';
-import { DENOMS, parseCents, formatCents, grandTotal, pickFloat, deposit } from '../src/lib/drawer.js';
+import {
+  DENOMS, MAX_FLOAT_BILL_CENTS, parseMoney, parseCents, formatCents, grandTotal,
+  pickFloat, deposit, overShort, drawerResult, buildSummary,
+} from '../src/lib/drawer.js';
 
-assert.equal(parseCents('200'), 20000);
-assert.equal(parseCents('$1,200.25'), 120025);
-assert.equal(parseCents('0.1'), 10);
-assert.equal(parseCents(''), null);
-assert.equal(parseCents('abc'), null);
-assert.equal(formatCents(123456), '$1,234.56');
-assert.equal(formatCents(-5), '-$0.05');
-// classic float trap: 0.1 + 0.2 style
-assert.equal(grandTotal({ c10: 1, c5: 2 }), 20);
-assert.equal(grandTotal({ c1: 3, c10: 3 }), 33);
-// full example: 2x$100, 3x$20, 7x$5, 4 quarters, 1 quarter roll
-const c = { b100: 2, b20: 3, b5: 7, c25: 4, r25: 1 };
-assert.equal(grandTotal(c), 20000 + 6000 + 3500 + 100 + 1000);
-// float $200: bills above $20 never kept. 3x$20=60, then $5 x7=35 -> 95, quarter roll 10 -> 105, 4 quarters 1 -> 106; cannot reach 200
-const f = pickFloat(c, 20000);
-assert.deepEqual(f.keep, { b20: 3, b5: 7, r25: 1, c25: 4 });
-assert.equal(f.missing, 20000 - 10600);
-// exact float
-const c2 = { b100: 1, b20: 12, b10: 5, c1: 50 };
-const f2 = pickFloat(c2, 20000);
-assert.deepEqual(f2.keep, { b20: 10 });
-assert.equal(f2.missing, 0);
-const dep = deposit(c2, f2.keep);
-assert.deepEqual(dep, { b100: 1, b20: 2, b10: 5, c1: 50 });
-assert.equal(grandTotal(dep) + f2.kept, grandTotal(c2));
-// float bigger than drawer
-assert.equal(pickFloat({ b5: 1 }, 10000).missing, 9500);
-// zero float
-assert.deepEqual(pickFloat(c, 0).keep, {});
-assert.ok(DENOMS.length === 16);
-console.log('drawer maths: all tests passed');
-// worked example from the article
+const byId = Object.fromEntries(DENOMS.map((d) => [d.id, d]));
+let checks = 0;
+const eq = (a, b, msg) => { checks++; assert.deepEqual(a, b, msg); };
+
+// ---- parsing
+eq(parseCents('200'), 20000);
+eq(parseCents('$1,200.25'), 120025);
+eq(parseCents('0.1'), 10);
+eq(parseCents('.5'), 50);
+eq(parseCents('5.'), 500);
+eq(parseCents(' $ 7 '), 700);
+eq(parseCents('0'), 0);
+eq(parseMoney('').status, 'empty');
+eq(parseMoney('   ').status, 'empty');
+for (const bad of ['abc', '20o', '12.345', '1e3', '-5', '.', '$', '200,50', '1,2', '1,2,3', '1,5', '12,34,567', ',100', '1,000,', '99999999999999999999', '10000000', '1.2.3']) {
+  eq(parseMoney(bad).status, 'invalid', `invalid: ${bad}`);
+  eq(parseCents(bad), null, `null: ${bad}`);
+}
+eq(parseCents('1,000'), 100000);
+eq(parseCents('1,234,567.89'), 123456789);
+eq(parseCents('9999999.99'), 999999999);
+
+// ---- formatting and totals (integer cents)
+eq(formatCents(123456), '$1,234.56');
+eq(formatCents(-5), '-$0.05');
+eq(formatCents(0), '$0.00');
+eq(formatCents(100000000), '$1,000,000.00');
+eq(grandTotal({ c10: 1, c5: 2 }), 20);
+eq(grandTotal({ c1: 3, c10: 3 }), 33);
+eq(grandTotal({}), 0);
+eq(grandTotal({ r25: 1, r10: 1, r5: 1, r1: 1 }), 1750);
+eq(grandTotal({ c100: 3, b1: 2 }), 500);
+eq(DENOMS.length, 16);
+const allOne = Object.fromEntries(DENOMS.map((d) => [d.id, 1]));
+eq(grandTotal(allOne), 20691 + 0, 'one of every row');
+
+// ---- worked example (article)
 const ex = { b100: 2, b50: 3, b20: 20, b10: 15, b5: 30, b1: 40, c25: 20, c10: 15, c5: 10, c1: 25 };
-assert.equal(grandTotal(ex), 109725);
-const fx = pickFloat(ex, 20000);
-assert.deepEqual(fx.keep, { b20: 10 });
-assert.equal(grandTotal(deposit(ex, fx.keep)), 89725);
-assert.equal(109725 - 20000 - 89000, 725); // over by $7.25
-// rolls and $1 coins
-assert.equal(grandTotal({ r25: 1, r10: 1, r5: 1, r1: 1 }), 1000 + 500 + 200 + 50);
-assert.equal(grandTotal({ c100: 3, b1: 2 }), 500);
-assert.equal(grandTotal({}), 0);
-// float uses small coins when bills run out; leaves no $50/$100
-assert.deepEqual(pickFloat({ b50: 5, c25: 8 }, 300).keep, { c25: 8 });
-assert.equal(pickFloat({ b50: 5, c25: 8 }, 300).missing, 100);
-// parse edge cases
-assert.equal(parseCents('12.345'), null);
-assert.equal(parseCents('.5'), 50);
-assert.equal(parseCents(' $ 7 '), 700);
-assert.equal(formatCents(0), '$0.00');
-assert.equal(formatCents(100000000), '$1,000,000.00');
-console.log('worked example and edge cases: all tests passed');
+eq(grandTotal(ex), 109725);
+const rEx = drawerResult(ex, 20000, 89000);
+eq(rEx.total, 109725);
+eq(rEx.depositCents, 89725);
+eq(rEx.missing, 0);
+eq(rEx.overShort, { diff: 725, label: 'Over' });
+eq(grandTotal(rEx.keep), 20000);
+console.log('float for the worked example:', JSON.stringify(rEx.keep));
+
+// ---- float: realistic mix, not a stack of twenties
+{
+  const keep = pickFloat(ex, 20000).keep;
+  assert.ok((keep.b20 || 0) * 2000 < 20000, 'float is not all twenties');
+  assert.ok(keep.b5 > 0 || keep.b1 > 0, 'float has small bills');
+  assert.ok(keep.c25 > 0, 'float has quarters');
+  checks += 3;
+}
+
+// ---- deposit always equals the pull list (the bug that mattered)
+{
+  const cases = [
+    [{ b100: 3 }, 20000, 30000, 20000],          // only $100 bills: nothing can stay
+    [{ b50: 4 }, 20000, 20000, 20000],
+    [{ b100: 1, b20: 8 }, 20000, 26000, 10000],  // 8 x $20 stays (160), $40 short
+    [{ b100: 2, b20: 3, b5: 7, c25: 4, r25: 1 }, 20000, 20000 + 6000 + 3500 + 100 + 1000, 0],
+  ];
+  for (const [c, f, total, _] of cases) {
+    const r = drawerResult(c, f, null);
+    eq(r.total, total);
+    eq(r.depositCents, grandTotal(r.pull), 'deposit equals pull list value');
+    eq(r.depositCents + grandTotal(r.keep), total, 'deposit plus kept equals total');
+    assert.ok(r.missing > 0); checks++;
+  }
+  const r1 = drawerResult({ b100: 3 }, 20000, null);
+  eq(r1.depositCents, 30000);
+  eq(r1.keep, {});
+  eq(r1.missing, 20000);
+  eq(r1.underFloat, false);
+  const r2 = drawerResult({ b100: 1, b20: 8 }, 20000, null);
+  eq(r2.depositCents, 10000);
+  eq(r2.missing, 4000);
+  eq(r2.keep, { b20: 8 });
+  eq(drawerResult({ b5: 1 }, 10000, null).missing, 9500);
+  eq(drawerResult({ b5: 1 }, 10000, null).underFloat, true);
+}
+
+// ---- float edge cases
+eq(pickFloat(ex, 0).keep, {});
+eq(pickFloat({ b50: 5, c25: 8 }, 300), { keep: { c25: 8 }, kept: 200, missing: 100 });
+eq(pickFloat({ c25: 1, c10: 3 }, 30), { keep: { c10: 3 }, kept: 30, missing: 0 }, 'exact set exists');
+eq(pickFloat({ c25: 1, c10: 4 }, 4000 / 100).missing, 0);
+eq(pickFloat({ b20: 1 }, -500), { keep: {}, kept: 0, missing: 0 });
+eq(deposit({ b20: 2, c1: 3 }, { b20: 1 }), { b20: 1, c1: 3 });
+{
+  const f = pickFloat({ b100: 1, b20: 12, b10: 5, c1: 50 }, 20000);
+  eq(f.missing, 0);
+  assert.ok(!f.keep.b100); checks++;
+}
+
+// ---- over and short
+eq(overShort(1000, 200, 800), { diff: 0, label: 'Balanced' });
+eq(overShort(1000, 200, 700), { diff: 100, label: 'Over' });
+eq(overShort(1000, 200, 900), { diff: -100, label: 'Short' });
+eq(overShort(100, 200, 0), { diff: -100, label: 'Short' }, 'float larger than drawer');
+eq(overShort(1000, null, 500), null, 'no float, no over or short');
+eq(overShort(1000, 200, null), null, 'no sales, no over or short');
+eq(overShort(1000, 0, 1000), { diff: 0, label: 'Balanced' }, 'zero float is a real float');
+
+// ---- no float entered
+{
+  const r = drawerResult(ex, null, 5000);
+  eq(r.hasFloat, false);
+  eq(r.depositCents, null);
+  eq(r.overShort, null);
+}
+
+// ---- summary text
+{
+  const s = buildSummary(ex, 20000, 89000, 'TIME');
+  assert.ok(s.includes('Total in drawer: $1,097.25')); 
+  assert.ok(s.includes('Cash to deposit: $897.25'));
+  assert.ok(s.includes('Over $7.25'));
+  assert.ok(s.includes('Leave in the drawer:') && s.includes('Pull for the deposit:'));
+  assert.ok(s.includes('Counted by:'));
+  assert.ok(!buildSummary(ex, null, null, 'T').includes('Cash to deposit'));
+  const short = buildSummary({ b100: 3 }, 20000, null, 'T');
+  assert.ok(short.includes('Cash to deposit: $300.00'));
+  assert.ok(short.includes('only $0.00 of the $200.00 float'));
+  checks += 8;
+}
+
+// ---- property tests: fixed seed
+let seed = 12345;
+const rnd = (n) => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+function oracleMax(counts, target) {
+  // independent check: reachable sums with a plain Set walk (small cases only)
+  let sums = new Set([0]);
+  for (const d of DENOMS.filter((x) => x.cents <= MAX_FLOAT_BILL_CENTS)) {
+    const next = new Set();
+    for (const s0 of sums) for (let n = 0; n <= (counts[d.id] || 0); n++) { const v = s0 + n * d.cents; if (v > target) break; next.add(v); }
+    sums = next;
+  }
+  return Math.max(...sums);
+}
+for (let i = 0; i < 400; i++) {
+  const counts = {};
+  for (const d of DENOMS) if (rnd(3) > 0) counts[d.id] = rnd(d.cents >= 1000 ? 6 : 14);
+  const target = rnd(2) ? rnd(60) * 5 : rnd(4000);
+  const r = drawerResult(counts, target, null);
+  for (const d of DENOMS) {
+    assert.ok((r.keep[d.id] || 0) <= (counts[d.id] || 0), 'keep within counts');
+    if (d.group === 'Bills' && d.cents > MAX_FLOAT_BILL_CENTS) assert.ok(!r.keep[d.id], 'no big bills in float');
+    assert.equal((r.keep[d.id] || 0) + (r.pull[d.id] || 0), counts[d.id] || 0, 'keep plus pull is the count');
+  }
+  assert.equal(grandTotal(r.keep) + r.missing, target, 'kept plus missing is the float');
+  assert.equal(r.depositCents + grandTotal(r.keep), r.total, 'deposit plus kept is the total');
+  assert.equal(r.depositCents, grandTotal(r.pull), 'deposit is the pull list');
+  assert.equal(r.missing, target - oracleMax(counts, target), 'float is exact whenever the cash allows it');
+  checks += 7 * 16 / 16;
+}
+
+console.log(`drawer tests passed (${checks} checks, 400 random drawers)`);
