@@ -24,7 +24,7 @@ export interface Guide {
 export const guides: Guide[] = [
   {
     slug: 'cash-drawer-float-calculator',
-    title: 'Cash Drawer Float Calculator | What to Leave as Your Starting Bank',
+    title: 'Cash Drawer Float Calculator | Starting Bank',
     h1: 'Cash drawer float calculator',
     linkLabel: 'Cash drawer float calculator',
     description: 'Count your drawer, enter your float, and see the exact bills and coins to leave behind. Includes sample $100, $200 and $300 float breakdowns.',
@@ -58,7 +58,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'how-much-to-leave-in-cash-drawer',
-    title: 'How Much to Leave in the Cash Drawer | Till Float by Business Type',
+    title: 'How Much to Leave in the Cash Drawer | Till Float',
     h1: 'How much to leave in the cash drawer',
     linkLabel: 'How much to leave in the cash drawer',
     description: 'Typical amounts to leave in a cash drawer for a cafe, store, food truck or bar, and how to take out the rest. Enter your count to see the deposit.',
@@ -242,7 +242,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'coffee-shop-cash-drawer-count',
-    title: 'Coffee Shop Cash Drawer Count | Float and Closing Count Calculator',
+    title: 'Coffee Shop Cash Drawer Count | Float and Closing',
     h1: 'Coffee shop cash drawer count',
     linkLabel: 'Coffee shop cash drawer count',
     description: 'A closing count for a cafe drawer: sample $150 float, what to count and keep apart, and a calculator that shows the deposit.',
@@ -278,7 +278,7 @@ export const guides: Guide[] = [
   },
   {
     slug: 'food-truck-cash-drawer-count',
-    title: 'Food Truck Cash Drawer Count | Cash Box Float and Closing Count',
+    title: 'Food Truck Cash Drawer Count | Float and Closing',
     h1: 'Food truck cash drawer count',
     linkLabel: 'Food truck cash drawer count',
     description: 'Count a food truck cash box after service. Sample $200 float, tips for events and wind, and a calculator that shows the deposit.',
