@@ -1,10 +1,10 @@
 ---
 import { DENOMS } from '../lib/drawer.js';
 const groups = ['Bills', 'Coins', 'Rolls'].map((g) => ({ name: g, rows: DENOMS.filter((d) => d.group === g) }));
-const field = 'block rounded-xl border border-line bg-paper px-3 text-lg font-semibold tabular-nums outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 aria-[invalid=true]:border-red-600';
-const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-paper text-2xl font-bold leading-none select-none active:bg-brand-soft hover:bg-brand-soft';
+const field = 'block rounded-xl border border-edge bg-paper px-3 text-lg font-semibold tabular-nums outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 aria-[invalid=true]:border-red-600';
+const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-center justify-center rounded-xl border border-edge bg-paper text-2xl font-bold leading-none select-none active:bg-brand-soft hover:bg-brand-soft';
 ---
-<section id="tool" aria-label="Cash drawer counter" class="rounded-2xl border border-line bg-card p-4 sm:shadow-[6px_6px_0_0_var(--line)] sm:p-6">
+<section id="tool" aria-label="Cash drawer counter" class="rounded-2xl border border-line bg-card p-4 shadow-[var(--card-shadow)] sm:p-6">
   <div class="grid gap-8 lg:grid-cols-[1.25fr_1fr]">
     <div id="rows" class="space-y-5">
       {groups.map((g) => (
@@ -68,8 +68,8 @@ const step = 'row-span-2 sm:row-span-1 flex h-12 w-11 sm:w-12 shrink-0 items-cen
       </div>
       <div class="flex flex-wrap gap-2">
         <button type="button" id="copy" class="h-12 flex-1 rounded-xl bg-brand px-4 font-semibold text-white hover:opacity-90">Copy summary</button>
-        <button type="button" id="print" class="h-12 rounded-xl border border-line px-4 font-semibold hover:bg-brand-soft">Print</button>
-        <button type="button" id="reset" class="h-12 rounded-xl border border-line px-4 font-semibold hover:bg-brand-soft">Reset</button>
+        <button type="button" id="print" class="h-12 rounded-xl border border-edge px-4 font-semibold hover:bg-brand-soft">Print</button>
+        <button type="button" id="reset" class="h-12 rounded-xl border border-edge px-4 font-semibold hover:bg-brand-soft">Reset</button>
       </div>
       <p id="status" class="min-h-5 text-sm text-muted" role="status"></p>
     </div>
