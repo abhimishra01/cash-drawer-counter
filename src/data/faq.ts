@@ -1,5 +1,7 @@
 // FAQ items. Rendered on the home page AND output as FAQPage JSON-LD.
 export const faq = [
+  { q: 'Is this an online cash drawer counter?', a: 'Yes. It runs in your web browser, so there is nothing to download or sign up for. Open the page, enter your bills and coins, and read the total, the deposit and the take-out list.' },
+  { q: 'Is there a cash drawer counter app?', a: 'There is no app to install. This is a web app that opens in the browser on your phone, tablet or computer. It saves your last float on your device, and it works the same on each of them.' },
   { q: 'How do I count a cash drawer?', a: 'Take out all cash, sort it by bill and coin type, and count each type once. Enter the counts in the calculator. It adds up each row and the grand total. Then subtract your float to get the cash to deposit.' },
   { q: 'What is a cash drawer float?', a: 'A float is the cash you leave in the register for the next shift to make change. It is also called a starting bank or a till float. You count it, but it is not part of the deposit.' },
   { q: 'How much should I leave in the drawer?', a: 'It depends on your shop. Many small shops leave $100 to $300 in a mix of small bills and coins. Use the amount your manager or owner sets.' },
