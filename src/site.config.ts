@@ -4,11 +4,11 @@ const cfg = {
   name: 'Cash Drawer Counter',                 // shown in header, title, footer
   domain: 'countthedrawercalculator.com',            // no https://, no www. Used for canonical, sitemap, robots
   cloudflareProject: 'cash-drawer-counter',    // Cloudflare Pages project name (used by npm run deploy)
-  keyword: 'count the drawer calculator',            // main keyword: goes in the H1 and title
+  keyword: 'cash drawer counter',            // main keyword: goes in the H1 and title
   keywords: ['cash drawer calculator', 'till counter calculator', 'cash register counter', 'drawer count sheet', 'cash deposit calculator'], // supporting keywords
   tagline: 'Free, fast and private',  // short line shown in the pill above the H1
   description:
-    'Count your cash drawer at shift end. Enter bills, coins and rolls, set your float, and see the deposit and which bills to pull. Free and private.',
+    'Cash drawer counter for shift end. Enter bills, coins and rolls, set your float, and see the deposit and which bills to pull. Free and private.',
   email: 'hello@countthedrawercalculator.com',       // contact email (shown on the Contact, Privacy and Terms pages)
   ga4: '',                            // GA4 measurement ID, e.g. 'G-XXXXXXXXXX'. Empty = Google Analytics off
   adsense: '',                        // AdSense publisher ID, e.g. 'ca-pub-1234567890123456'. Empty = ads off

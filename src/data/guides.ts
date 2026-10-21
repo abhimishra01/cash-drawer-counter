@@ -382,6 +382,43 @@ export const guides: Guide[] = [
     ],
     related: ['cash-drop-calculator', 'cash-drawer-over-short-calculator', 'close-out-register-checklist'],
   },
+  {
+    slug: 'fastest-way-to-count-a-cash-drawer',
+    title: 'Fastest Way to Count a Cash Drawer | Step by Step',
+    h1: 'Fastest way to count a cash drawer',
+    linkLabel: 'Fastest way to count a cash drawer',
+    description: 'How to count a cash drawer fast: sort by bill, count in stacks, use coin rolls, and let the counter add it up. Worked example included.',
+    intro: 'The fastest way to count a cash drawer is to sort first, count each type once, and let a calculator do the adding. Enter your counts below. The float is set to $200.',
+    presetFloat: '200',
+    sections: [
+      { h: 'How to count a cash drawer in five minutes', ol: [
+        'Stop sales and print the shift report, so the cash sales number is final.',
+        'Take out all the cash, including bills under the tray.',
+        'Sort bills by value and face them the same way. Put the largest on top.',
+        'Count each stack once. Type the number into the counter. Start with $100 bills and go down to pennies.',
+        'Type the float and the cash sales from the report. Read the deposit, the leave list and over or short.',
+      ] },
+      { h: 'Tricks that save time', ul: [
+        'Count bills in stacks of ten. Count coins in rolls or stacks of ten, not one by one.',
+        'Use the Enter key to jump to the next row. On a phone, the number keypad opens by itself.',
+        'Keep $1 bills in straps of 100 when you can. A strap of 100 $1 bills is $100.00.',
+        'Count once and check the total against the report. Count again only if the drawer is off by more than a few dollars.',
+      ] },
+      { h: 'Worked example', p: [
+        'A cafe closes with 2 $100 bills, 3 $50 bills, 20 $20 bills, 15 $10 bills, 30 $5 bills, 40 $1 bills, 20 quarters, 15 dimes, 10 nickels and 25 pennies.',
+        'Bills add up to $1,090.00 and coins to $7.25. The drawer holds $1,097.25. With a $200.00 float, the deposit is $897.25.',
+      ] },
+      { h: 'Where the time goes', p: [
+        'Most of the time goes to recounts. A clean sort and one careful count beat three fast, sloppy ones. If the drawer is off, check for stuck bills and for coupons or checks mixed in with cash before you count again.',
+      ] },
+    ],
+    faq: [
+      { q: 'What is the fastest way to count a cash drawer?', a: 'Sort the cash by type, count each type once in stacks, and enter the counts in a calculator. The calculator adds the rows and shows the deposit.' },
+      { q: 'How long should a drawer count take?', a: 'A small drawer takes about five minutes with a sorted count. A busy bar or store may take longer.' },
+      { q: 'Should I count the drawer twice?', a: 'Count a second time only if the result is off by more than a few dollars. Count a different way the second time, for example by stack size.' },
+    ],
+    related: ['close-out-register-checklist', 'cash-drawer-count-with-rolls', 'cash-drop-calculator'],
+  },
 ];
 
 export const guideBySlug = Object.fromEntries(guides.map((g) => [g.slug, g]));
