@@ -27,7 +27,7 @@ export default {
   domain: 'bingemind.com/cash-drawer-counter',
   origin: 'https://bingemind.com/cash-drawer-counter',
   bingemind,
-  owner: bingemind ? 'Bingemind' : cfg.owner,
+  owner: bingemind ? 'Bingemind (Abhishek Mishra)' : cfg.owner,
   contactWord: bingemind ? 'Contact' : 'Email',
   contactHref: bingemind ? 'https://bingemind.com/#contact' : `mailto:${cfg.email}`,
   contactLabel: bingemind ? 'bingemind.com/#contact' : cfg.email,
